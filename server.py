@@ -64,10 +64,10 @@ class WebSocket(WebSocketServerProtocol):
         all_clients = parsed.get('all', False)
 
         if all_clients:
-            #All clients?
+            # All clients?
             self.sendToALl(message)
         else:
-            #Send to the user a message "to is who"
+            # Send to the user a message "to is who"
             if to in self.clients:
                 if to != self.client:
                     self.clients[to].sendMessage(message, False)
