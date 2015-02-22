@@ -1,6 +1,8 @@
 # AutobahnTwistedWebsocket
 A simple Python websocket
 
+Run the requirements.txt "pip install -r > requirements.txt"
+
 #A websocket javascript client
 ```js
         var user = 'Juan';
