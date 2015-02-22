@@ -2,12 +2,14 @@
 A simple Python websocket
 
 Run the requirements.txt 
+
 `pip install -r > requirements.txt`
 
 Run the server
+
 `python server.py`
 
-#A websocket javascript client
+*A websocket javascript client
 ```js
         var user = 'Juan';
         //User is needed to authenticate my local user
