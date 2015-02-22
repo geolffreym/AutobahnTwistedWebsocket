@@ -70,7 +70,7 @@ class WebSocket(WebSocketServerProtocol):
             #Send to the user a message "to is who"
             if to in self.clients:
                 if to != self.client:
-                    self.clients[to].sendMessage(message, False)
+                    self.clients[to].sendMessage(message_in, False)
                     print "Message sent to " + to
 
         print "No action done"
