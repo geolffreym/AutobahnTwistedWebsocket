@@ -1,7 +1,11 @@
 # AutobahnTwistedWebsocket
 A simple Python websocket
 
-Run the requirements.txt `pip install -r > requirements.txt`
+Run the requirements.txt 
+`pip install -r > requirements.txt`
+
+Run the server
+`python server.py`
 
 #A websocket javascript client
 ```js
