@@ -29,7 +29,7 @@ class WebSocket(WebSocketServerProtocol):
     def onOpen(self):
 
         # Append a new client to the list
-        user = self.http_request_params.get('user', 'default')[0]
+        user = self.http_request_params.get('user')[0]
         self.clients[user] = self
         print "Connection Open for " + user
 
@@ -47,7 +47,7 @@ class WebSocket(WebSocketServerProtocol):
         """
         self.clients[self.client].sendMessage(message, False)
 
-    def sendToALl(self, message):
+    def sendToAll(self, message):
         """Send a message to all the clients
         @:param message The message
         """
@@ -65,7 +65,7 @@ class WebSocket(WebSocketServerProtocol):
 
         if all_clients:
             #All clients?
-            self.sendToALl(message)
+            self.sendToAll(message)
         else:
             #Send to the user a message "to is who"
             if to in self.clients:
