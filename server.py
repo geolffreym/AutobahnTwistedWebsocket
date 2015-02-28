@@ -30,7 +30,8 @@ class WebSocket(WebSocketServerProtocol):
 
         # Append a new client to the list
         user = self.http_request_params.get('user', 'default')[0]
-        self.clients[user] = self
+        if user not in clients:
+            self.clients[user] = self
         print "Connection Open for " + user
 
     def onMessage(self, payload, isBinary):
@@ -39,6 +40,8 @@ class WebSocket(WebSocketServerProtocol):
         self.handleMessage(payload)
 
     def onClose(self, wasClean, code, reason):
+        if self.client in clients:
+            del clients[self.client]
         print "Connection Closed"
 
     def sendBack(self, message):
@@ -72,17 +75,19 @@ class WebSocket(WebSocketServerProtocol):
                 if to != self.client:
                     self.clients[to].sendMessage(message, False)
                     print "Message sent to " + to
+            else:
+                self.sendBack('{"connected":"false"}')
 
         print "No action done"
 
 
 # Run the server
 clients = {}
-factory = WebSocketServerFactory("ws://localhost:9000", debug=False)
-factory.protocol = WebSocket
+port = 8000
+factory = WebSocketServerFactory("ws://localhost:" + str(port), debug=False)
+factory.protocol = WebSocket(clients)
 factory.isServer = True
 
-
 # Reactor TCP -> Interact with the protocol
-reactor.listenTCP(9000, factory)
+reactor.listenTCP(port, factory)
 reactor.run()
