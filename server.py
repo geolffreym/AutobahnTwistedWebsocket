@@ -10,10 +10,13 @@ class WebSocket(WebSocketServerProtocol):
     http://autobahn.ws/python/reference/autobahn.websocket.html#autobahn.websocket.protocol.WebSocketServerProtocol.onConnect
     """
 
-    def __init__(self):
+    def __init__(self, clients):
         self.clients = clients
         self.client = None
         self.peer = None
+
+    def __call__(self, *args, **kwargs):
+        return self
 
     def onConnect(self, request):
 
