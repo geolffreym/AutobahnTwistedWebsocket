@@ -18,7 +18,7 @@ class WebSocketClient(WebSocketClientProtocol):
     def onConnect(self, response):
         """On Connect what to do?"""
         if self.events.on_connect is not None:
-            self.events.on_connect(response)
+            self.events.on_connect(response, self)
 
     def onOpen(self):
         """On Open what to do?"""
@@ -28,7 +28,7 @@ class WebSocketClient(WebSocketClientProtocol):
     def onMessage(self, payload, isBinary):
         """On Message what to do?"""
         if self.events.on_message is not None:
-            self.events.on_message(payload)
+            self.events.on_message(payload, self)
 
     def onClose(self, wasClean, code, reason):
         """On Close what to do?"""
@@ -95,13 +95,23 @@ class SocketMiddleWare(MiddleWareSocketEvent):
 
 
 # Example
-def connect(response):
+def message(message):
+    print message
+
+
+def connect(response, peer):
+    peer.sendMessage('{"to": "Carlos", "message": "hola", "from": "Juan"}')
     print "I am connected callback"
 
 
 socket = SocketMiddleWare()
+
+#Event Handlers
 socket.set_on_connect(connect)
-print socket.connect_socket('Juan')
+socket.set_on_message(message)
+
+#Run client
+socket.connect_socket('Juan')
 
 
 

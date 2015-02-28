@@ -38,7 +38,7 @@ Run the server
     
     socket = SocketMiddleWare()
     socket.set_on_connect(connect)
-    socket.set_on_messaget(message)
+    socket.set_on_message(message)
     socket.connect_socket('Juan')
 
 
