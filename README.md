@@ -27,18 +27,24 @@ Run the server
 ###A websocket python client
 
 ```python
-    # Example
     
+    # Example
     def message(message):
         print message
     
-    def connect(response):
+    
+    def connect(response, peer):
+        peer.sendMessage('{"to": "Carlos", "message": "hola", "from": "Juan"}')
         print "I am connected callback"
     
     
     socket = SocketMiddleWare()
+    
+    #Event Handlers
     socket.set_on_connect(connect)
     socket.set_on_message(message)
+    
+    #Run client
     socket.connect_socket('Juan')
 
 
