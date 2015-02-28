@@ -85,7 +85,7 @@ class SocketMiddleWare(MiddleWareSocketEvent):
         @:param user string
         @:param port int
         """
-        factory = WebSocketClientFactory("ws://localhost:" + str(port) + "?user=" + user, debug=False)
+        factory = WebSocketClientFactory("ws://localhost:" + str(port) + "?user=" + str(user), debug=False)
         factory.protocol = WebSocketClient(self)
 
         reactor.connectTCP('127.0.0.1', port, factory)
