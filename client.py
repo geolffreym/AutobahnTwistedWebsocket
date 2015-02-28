@@ -101,5 +101,7 @@ def connect(response):
 
 socket = SocketMiddleWare()
 socket.set_on_connect(connect)
-socket.connect_socket('Juan')
+print socket.connect_socket('Juan')
+
+
 

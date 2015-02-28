@@ -22,3 +22,25 @@ Run the server
             console.log(e)
         });
 ```
+
+
+###A websocket python client
+
+```python
+    # Example
+    
+    def message(message):
+        print message
+    
+    def connect(response):
+        print "I am connected callback"
+    
+    
+    socket = SocketMiddleWare()
+    socket.set_on_connect(connect)
+    socket.set_on_messaget(message)
+    socket.connect_socket('Juan')
+
+
+
+```
