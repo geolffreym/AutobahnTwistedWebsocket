@@ -34,12 +34,12 @@ class WebSocket(WebSocketServerProtocol):
 
         # Append a new client to the list
         user = self.http_request_params.get('user', 'default')[0]
-        if user not in clients:
-            self.clients[user] = self
-        else:
+        if user in clients:
             self.clients[user].transport.loseConnection()
-            self.clients[user] = self
             print "Client already created -> Recreating connection"
+        else:
+            self.clients[user] = self
+
         print "Connection Open for " + user
 
     def onMessage(self, payload, isBinary):
