@@ -20,7 +20,6 @@ class WebSocketClient(WebSocketClientProtocol):
         """On Connect what to do?"""
         if self.events.on_connect is not None:
             callback = self.events.on_connect.pop('callback')
-            print callback
             callback(response=response, peer=self, params=self.events.on_connect)
 
     def onOpen(self):
