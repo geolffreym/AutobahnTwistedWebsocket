@@ -31,12 +31,7 @@ class WebSocket(WebSocketServerProtocol):
         print "Connected"
 
     def onOpen(self):
-        user = self.http_request_params.get('user', 'default')[0]
-        if user in clients:
-            if self.peer != self.clients[user].peer:
-                self.clients[user].transport.loseConnection()
-            print "Client already created -> Recreating connection"
-
+        user = self.client
         self.clients[user] = self
         print "Connection Open for " + user
 
