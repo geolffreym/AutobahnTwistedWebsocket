@@ -44,6 +44,7 @@ class MiddleWareSocketEvent(object):
         self.on_open = None
         self.on_close = None
         self.on_message = None
+        self.peer = None
 
     def set_on_connect(self, callback):
         """
@@ -86,12 +87,20 @@ class SocketMiddleWare(MiddleWareSocketEvent):
         @:param port int
         """
         factory = WebSocketClientFactory("ws://localhost:" + str(port) + "?user=" + str(user), debug=False)
-        factory.protocol = WebSocketClient(self)
+        self.peer = factory.protocol = WebSocketClient(self)
 
         reactor.connectTCP('127.0.0.1', port, factory)
         reactor.run()
 
-        return factory.protocol
+    def async_connect(self, user='default', port=8000):
+        from multiprocessing import Process
+
+        websocket_process = Process(target=self.connect_socket, args=(user, port))
+        websocket_process.start()
+        websocket_process.join()
+
+    def get_peer(self):
+        return self.peer
 
 
 # Example
@@ -106,12 +115,12 @@ def connect(response, peer):
 
 socket = SocketMiddleWare()
 
-#Event Handlers
+# Event Handlers
 socket.set_on_connect(connect)
 socket.set_on_message(message)
 
-#Run client
-socket.connect_socket('Juan')
+# Run client
+socket.async_connect('Juan')
 
 
 
