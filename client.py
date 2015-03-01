@@ -73,8 +73,10 @@ class MiddleWareSocketEvent(object):
 
 
 class SocketMiddleWare(MiddleWareSocketEvent):
-    def connect_socket(self, user='default', port=9000):
+    def connect_socket(self, user='default', port=9000, timeout=5000):
         factory = WebSocketClientFactory("ws://localhost:" + str(port) + "?user=" + str(user), debug=False)
+        factory.setProtocolOptions(serverConnectionDropTimeout=timeout)
+
         self.peer = factory.protocol = WebSocketClient(self)
 
         reactor.connectTCP('127.0.0.1', port, factory)

@@ -81,9 +81,10 @@ class WebSocket(WebSocketServerProtocol):
 
 
 # Run the server
-def runServer(clients, port):
+def runServer(clients, port, timeout=5000):
     factory = WebSocketServerFactory("ws://localhost:" + str(port), debug=False)
     factory.protocol = WebSocket(clients)
+    factory.setProtocolOptions(closeHandshakeTimeout=timeout)
     factory.isServer = True
 
     # Reactor TCP -> Interact with the protocol
