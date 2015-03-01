@@ -86,8 +86,7 @@ class WebSocket(WebSocketServerProtocol):
 
 
 # Run the server
-def runServer(clients):
-    port = 9000
+def runServer(clients, port):
     factory = WebSocketServerFactory("ws://localhost:" + str(port), debug=False)
     factory.protocol = WebSocket(clients)
     factory.isServer = True
@@ -98,7 +97,8 @@ def runServer(clients):
 
 
 clients = {}
+port = 9000
 
-websocket_server = Process(target=runServer, args=(clients,))
+websocket_server = Process(target=runServer, args=(clients, port,))
 # websocket_server.daemon = True
 websocket_server.start()
