@@ -1,6 +1,7 @@
 from autobahn.twisted.websocket import WebSocketServerProtocol, WebSocketServerFactory
 from autobahn.websocket.http import HttpException
 from twisted.internet import reactor
+from multiprocessing import Process
 import json
 
 
@@ -85,12 +86,19 @@ class WebSocket(WebSocketServerProtocol):
 
 
 # Run the server
-clients = {}
-port = 8000
-factory = WebSocketServerFactory("ws://localhost:" + str(port), debug=False)
-factory.protocol = WebSocket(clients)
-factory.isServer = True
+def runServer(clients):
+    port = 9000
+    factory = WebSocketServerFactory("ws://localhost:" + str(port), debug=False)
+    factory.protocol = WebSocket(clients)
+    factory.isServer = True
 
-# Reactor TCP -> Interact with the protocol
-reactor.listenTCP(port, factory)
-reactor.run()
+    # Reactor TCP -> Interact with the protocol
+    reactor.listenTCP(port, factory)
+    reactor.run()
+
+
+clients = {}
+
+websocket_server = Process(target=runServer, args=(clients,))
+# websocket_server.daemon = True
+websocket_server.start()
