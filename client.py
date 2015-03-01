@@ -19,26 +19,26 @@ class WebSocketClient(WebSocketClientProtocol):
     def onConnect(self, response):
         """On Connect what to do?"""
         if self.events.on_connect is not None:
-            callback = self.events.on_connect.get('callback')
+            callback = self.events.on_connect.pop('callback')
             print callback
             callback(response=response, peer=self, params=self.events.on_connect)
 
     def onOpen(self):
         """On Open what to do?"""
         if self.events.on_open is not None:
-            callback = self.events.on_open.get('callback')
+            callback = self.events.on_open.pop('callback')
             callback(peer=self, params=self.events.on_open)
 
     def onMessage(self, payload, isBinary):
         """On Message what to do?"""
         if self.events.on_message is not None:
-            callback = self.events.on_message.get('callback')
+            callback = self.events.on_message.pop('callback')
             callback(message=payload, peer=self, params=self.events.on_message)
 
     def onClose(self, wasClean, code, reason):
         """On Close what to do?"""
         if self.events.on_close is not None:
-            callback = self.events.on_close.get('callback')
+            callback = self.events.on_close.pop('callback')
             callback(peer=self, code=code, reason=reason, params=self.events.on_close)
 
 
