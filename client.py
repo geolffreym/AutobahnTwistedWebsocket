@@ -97,7 +97,7 @@ class SocketMiddleWare(MiddleWareSocketEvent):
 
         websocket_process = Process(target=self.connect_socket, args=(user, port))
         websocket_process.start()
-        websocket_process.join()
+        #websocket_process.join()
 
     def get_peer(self):
         return self.peer
