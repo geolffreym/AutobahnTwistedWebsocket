@@ -11,8 +11,8 @@ class WebSocket(WebSocketServerProtocol):
     http://autobahn.ws/python/reference/autobahn.websocket.html#autobahn.websocket.protocol.WebSocketServerProtocol.onConnect
     """
 
-    def __init__(self, clients):
-        self.clients = clients
+    def __init__(self, dclients):
+        self.clients = dclients
         self.client = None
         self.peer = None
 
@@ -37,7 +37,8 @@ class WebSocket(WebSocketServerProtocol):
         if user not in clients:
             self.clients[user] = self
         else:
-            print "Client already created -> Using Same Connection"
+            self.clients[user].transport.loseConnection()
+            print "Client already created -> Closing old connection"
         print "Connection Open for " + user
 
     def onMessage(self, payload, isBinary):
