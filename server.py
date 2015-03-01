@@ -38,7 +38,8 @@ class WebSocket(WebSocketServerProtocol):
             self.clients[user] = self
         else:
             self.clients[user].transport.loseConnection()
-            print "Client already created -> Closing old connection"
+            self.clients[user] = self
+            print "Client already created -> Recreating connection"
         print "Connection Open for " + user
 
     def onMessage(self, payload, isBinary):
