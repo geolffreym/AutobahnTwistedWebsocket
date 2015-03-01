@@ -83,7 +83,7 @@ class SocketMiddleWare(MiddleWareSocketEvent):
         reactor.run()
 
     def async_connect(self, user='default', port=9000):
-        websocket_process = Process(target=self.connect_socket, name='websocket_client', args=(user, port))
+        websocket_process = Process(target=self.connect_socket, name='websocket_client' + str(user), args=(user, port))
         websocket_process.start()
 
         return websocket_process
