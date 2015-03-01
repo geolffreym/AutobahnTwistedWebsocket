@@ -36,6 +36,8 @@ class WebSocket(WebSocketServerProtocol):
         user = self.http_request_params.get('user', 'default')[0]
         if user not in clients:
             self.clients[user] = self
+        else:
+            print "Client already created -> Using Same Connection"
         print "Connection Open for " + user
 
     def onMessage(self, payload, isBinary):
@@ -79,8 +81,6 @@ class WebSocket(WebSocketServerProtocol):
                 if to != self.client:
                     self.clients[to].sendMessage(message, False)
                     print "Message sent to " + to
-            else:
-                self.sendBack('{"connected":"false"}')
 
         print "No action done"
 
