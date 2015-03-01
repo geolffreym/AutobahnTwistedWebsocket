@@ -62,7 +62,7 @@ class MiddleWareSocketEvent(object):
         if isfunction(callback):
             self.on_open = callback
 
-    def set_on_clone(self, callback):
+    def set_on_close(self, callback):
         """
         Set callback event for close event
         @:param callback function
