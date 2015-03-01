@@ -3,6 +3,7 @@ from inspect import isfunction
 from autobahn.twisted.websocket import \
     WebSocketClientProtocol, WebSocketClientFactory
 from autobahn.websocket.http import HttpException
+from multiprocessing import Process
 from twisted.internet import reactor
 
 
@@ -18,22 +19,27 @@ class WebSocketClient(WebSocketClientProtocol):
     def onConnect(self, response):
         """On Connect what to do?"""
         if self.events.on_connect is not None:
-            self.events.on_connect(response, self)
+            callback = self.events.on_connect.get('callback')
+            print callback
+            callback(response=response, peer=self, params=self.events.on_connect)
 
     def onOpen(self):
         """On Open what to do?"""
         if self.events.on_open is not None:
-            self.events.on_open(self)
+            callback = self.events.on_open.get('callback')
+            callback(peer=self, params=self.events.on_open)
 
     def onMessage(self, payload, isBinary):
         """On Message what to do?"""
         if self.events.on_message is not None:
-            self.events.on_message(payload, self)
+            callback = self.events.on_message.get('callback')
+            callback(message=payload, peer=self, params=self.events.on_message)
 
     def onClose(self, wasClean, code, reason):
         """On Close what to do?"""
         if self.events.on_close is not None:
-            self.events.on_close(code, reason)
+            callback = self.events.on_close.get('callback')
+            callback(peer=self, code=code, reason=reason, params=self.events.on_close)
 
 
 class MiddleWareSocketEvent(object):
@@ -46,57 +52,39 @@ class MiddleWareSocketEvent(object):
         self.on_message = None
         self.peer = None
 
-    def set_on_connect(self, callback):
-        """
-        Set callback event for connect event
-        @:param callback function
-        """
-        if isfunction(callback):
-            self.on_connect = callback
+    def set_on_connect(self, *args, **kwargs):
+        if 'callback' in kwargs:
+            if isfunction(kwargs.get('callback')):
+                self.on_connect = kwargs
 
-    def set_on_open(self, callback):
-        """
-        Set callback event for open event
-        @:param callback function
-        """
-        if isfunction(callback):
-            self.on_open = callback
+    def set_on_open(self, *args, **kwargs):
+        if 'callback' in kwargs:
+            if isfunction(kwargs.get('callback')):
+                self.on_open = kwargs
 
-    def set_on_close(self, callback):
-        """
-        Set callback event for close event
-        @:param callback function
-        """
-        if isfunction(callback):
-            self.on_close = callback
+    def set_on_close(self, *args, **kwargs):
+        if 'callback' in kwargs:
+            if isfunction(kwargs.get('callback')):
+                self.on_close = kwargs
 
-    def set_on_message(self, callback):
-        """
-        Set callback event for message event
-        @:param callback function
-        """
-        if isfunction(callback):
-            self.on_message = callback
+    def set_on_message(self, *args, **kwargs):
+        if 'callback' in kwargs:
+            if isfunction(kwargs.get('callback')):
+                self.on_message = kwargs
 
 
 class SocketMiddleWare(MiddleWareSocketEvent):
-    def connect_socket(self, user, port=8000):
-        """
-        Connect the client to server
-        @:param user string
-        @:param port int
-        """
+    def connect_socket(self, user='default', port=9000):
         factory = WebSocketClientFactory("ws://localhost:" + str(port) + "?user=" + str(user), debug=False)
         self.peer = factory.protocol = WebSocketClient(self)
 
         reactor.connectTCP('127.0.0.1', port, factory)
         reactor.run()
 
-    def async_connect(self, user='default', port=8000):
-        from multiprocessing import Process
-
-        websocket_process = Process(target=self.connect_socket, args=(user, port))
+    def async_connect(self, user='default', port=9000):
+        websocket_process = Process(target=self.connect_socket, name='websocket_client', args=(user, port))
         websocket_process.start()
+
         return websocket_process
 
     def get_peer(self):
@@ -104,20 +92,19 @@ class SocketMiddleWare(MiddleWareSocketEvent):
 
 
 # Example
-def message(message):
+def message(*args, **kwargs):
     print message
 
 
-def connect(response, peer):
-    peer.sendMessage('{"to": "Carlos", "message": "hola", "from": "Juan"}')
+def connect(*args, **kwargs):
     print "I am connected callback"
 
 
 socket = SocketMiddleWare()
 
 # Event Handlers
-socket.set_on_connect(connect)
-socket.set_on_message(message)
+socket.set_on_connect(callback=connect)
+socket.set_on_message(callback=message)
 
 # Run client
 socket.async_connect('Juan')

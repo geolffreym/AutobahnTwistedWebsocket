@@ -28,25 +28,24 @@ Run the server
 
 ```python
     
+   
     # Example
-    def message(message):
+    def message(*args, **kwargs):
         print message
     
     
-    def connect(response, peer):
-        peer.sendMessage('{"to": "Carlos", "message": "hola", "from": "Juan"}')
+    def connect(*args, **kwargs):
         print "I am connected callback"
     
     
     socket = SocketMiddleWare()
     
-    #Event Handlers
-    socket.set_on_connect(connect)
-    socket.set_on_message(message)
+    # Event Handlers
+    socket.set_on_connect(callback=connect)
+    socket.set_on_message(callback=message)
     
-    #Run client
-    socket.connect_socket('Juan')
-
+    # Run client
+    socket.async_connect('Juan')
 
 
 ```
