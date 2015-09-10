@@ -3,6 +3,7 @@ from autobahn.twisted.websocket import WebSocketServerProtocol, \
 
 import json
 
+
 # The Protocol Handler WebSocket
 class ServerProtocol(WebSocketServerProtocol):
     user = None
