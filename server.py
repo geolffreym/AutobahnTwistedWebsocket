@@ -1,100 +1,92 @@
-from autobahn.twisted.websocket import WebSocketServerProtocol, WebSocketServerFactory
-from autobahn.websocket.http import HttpException
-from twisted.internet import reactor
-from multiprocessing import Process
+from autobahn.twisted.websocket import WebSocketServerProtocol, \
+    WebSocketServerFactory, listenWS
+
 import json
 
-
-class WebSocket(WebSocketServerProtocol):
-    """
-    WebSocketProtocol
-    http://autobahn.ws/python/reference/autobahn.websocket.html#autobahn.websocket.protocol.WebSocketServerProtocol.onConnect
-    """
-
-    def __init__(self, dclients):
-        self.clients = dclients
-        self.client = None
-        self.peer = None
-
-    def __call__(self, *args, **kwargs):
-        return self
-
-    def onConnect(self, request):
-
-        # Who can connect to my server?
-        if not request.origin == "http://127.0.0.1:8000":
-            raise HttpException(401, "Not authorized user")
-
-        # Live client and Peer
-        self.client = request.params.get('user')[0]
-        self.peer = request.peer
-        print "Connected"
+# The Protocol Handler WebSocket
+class ServerProtocol(WebSocketServerProtocol):
+    user = None
 
     def onOpen(self):
-        user = self.client
-        self.clients[user] = self
-        print "Connection Open for " + user
+        print "Connection open"
+
+    def onConnect(self, request):
+        self.user = request.params.get('user')[0]
+        self.factory.register(self)
+
+        print("Client connecting: {}".format(request.peer))
 
     def onMessage(self, payload, isBinary):
-        # On Message just Handle
-        print "New Message. Handling..."
-        self.handleMessage(payload)
+        if not isBinary:
+            self.factory.handleMessage(payload, self)
 
-    def onClose(self, wasClean, code, reason):
-        if self.client in clients:
-            del clients[self.client]
-        print "Connection Closed"
+    def connectionLost(self, reason):
+        WebSocketServerProtocol.connectionLost(self, reason)
+        self.factory.unregister(self)
 
-    def sendBack(self, message):
-        """Send back a message to the sender
-        @:param message The message
-        """
-        self.clients[self.client].sendMessage(message, False)
 
-    def sendToALl(self, message):
-        """Send a message to all the clients
-        @:param message The message
-        """
-        for user in self.clients:
-            user.sendMessage(message, False)
+# The Factory
+class ServerFactory(WebSocketServerFactory):
+    def __init__(self, url, debug=False, debugCodePaths=False):
+        WebSocketServerFactory.__init__(self, url, debug=debug, debugCodePaths=debugCodePaths)
+        self.clients = {}
 
-    def handleMessage(self, message_in):
-        """Send back a message to the sender
-        @:param message_in The incoming message from the peer
-        """
-        parsed = json.loads(message_in)
-        to = parsed.get('to', 'default')
-        message = str(parsed.get('message', 'default'))
-        all_clients = parsed.get('all', False)
+    def register(self, protocol):
+        if protocol.user not in self.clients:
+            print("Registered client {}".format(protocol.user))
+            self.clients[protocol.user] = protocol
 
-        if all_clients:
-            # All clients?
-            self.sendToALl(message)
+    def unregister(self, protocol):
+        if protocol.user in self.clients:
+            print("Unregistered client {}".format(protocol.user))
+            del self.clients[protocol.user]
+
+    def processMsg(self, msg):
+        try:
+            return json.loads(msg)
+        except ValueError:
+            return msg
+
+    def handleMessage(self, msg, protocol):
+        json = self.processMsg(msg)
+
+        if 'to' in json:
+            self.sendTo(json.get('to'), msg, protocol)
         else:
-            # Send to the user a message "to is who"
-            if to in self.clients:
-                if to != self.client:
-                    self.clients[to].sendMessage(message, False)
-                    print "Message sent to " + to
+            if 'all' in json:
+                self.sendAll(msg, protocol)
 
-        print "No action done"
+    def sendTo(self, usr, msg, protocol):
+        if usr not in self.clients:
+            context = dict()
+            context['offline'] = True
+            context['user'] = usr
+            protocol.sendMessage(json.dumps(context))
+            return
+
+        if usr != protocol.user:
+            print("Message sent to {}".format(usr))
+            self.clients[usr].sendMessage(msg)
+
+    def sendAll(self, msg, protocol):
+        for k, c in self.clients.items():
+            self.sendTo(k, msg, protocol)
 
 
-# Run the server
-def runServer(clients, port, timeout=5000):
-    factory = WebSocketServerFactory("ws://localhost:" + str(port), debug=False)
-    factory.protocol = WebSocket(clients)
-    factory.setProtocolOptions(closeHandshakeTimeout=timeout)
+if __name__ == '__main__':
+    from twisted.internet import reactor
+
+    port, debug = 8000, False
+    factory = ServerFactory("ws://localhost:" + str(port),
+                            debug=debug,
+                            debugCodePaths=debug)
+
+    factory.protocol = ServerProtocol
     factory.isServer = True
+    factory.setProtocolOptions(
+        allowHixie76=True,
+        allowedOrigins=[]
+    )
 
-    # Reactor TCP -> Interact with the protocol
-    reactor.listenTCP(port, factory)
+    listenWS(factory)
     reactor.run()
-
-
-clients = {}
-port = 9000
-
-websocket_server = Process(target=runServer, args=(clients, port,))
-# websocket_server.daemon = True
-websocket_server.start()
